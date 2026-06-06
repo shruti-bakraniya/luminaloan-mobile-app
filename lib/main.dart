@@ -1,8 +1,9 @@
-import 'package:luminaloan/screens.dart';
-import 'package:luminaloan/utils/utils.dart';
+import 'package:flutter/material.dart';
 
-import 'commons.dart';
 import 'constants.dart';
+import 'screens.dart';
+import 'styles/themes.dart';
+import 'utils/utils.dart';
 
 
 void main() async {

@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:luminaloan/commons.dart';
 
 /// Used to initialize any services or other important things for the app
 Future<void> initializeApp() async {

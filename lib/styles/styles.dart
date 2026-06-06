@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:luminaloan/commons.dart';
+
+import 'colors.dart';
 
 ///Fonts used in the app. A const is used to avoid String typos
 class Font {

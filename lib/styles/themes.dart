@@ -1,4 +1,8 @@
-import 'package:luminaloan/commons.dart';
+import 'package:flutter/material.dart';
+
+import 'colors.dart';
+import 'sizes.dart';
+import 'styles.dart';
 
 ThemeData get lightTheme {
   return ThemeData(
