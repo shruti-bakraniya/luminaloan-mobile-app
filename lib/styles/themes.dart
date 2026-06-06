@@ -6,84 +6,132 @@ import 'styles.dart';
 
 ThemeData get lightTheme {
   return ThemeData(
-      fontFamily: Font.montserrat,
-      primarySwatch: Colors.blue,
-      useMaterial3: true,
-      cardTheme: const CardThemeData(
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16.0)),
-        ),
-      ),
-      textTheme: TextTheme(
-        bodySmall: TextStyle(fontSize: 12.0),
-        bodyLarge: TextStyle(fontSize: 12.0),
-      ),
-      appBarTheme: const AppBarTheme(
-        // iconTheme: IconThemeData(color: Colors.black),
-        iconTheme: IconThemeData(color: MyColors.greyDark),
-        backgroundColor: Colors.white,
+    useMaterial3: true,
+    brightness: Brightness.light,
+    fontFamily: AppStyles.fontFamily,
+    scaffoldBackgroundColor: AppColors.lightScaffold,
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.navyPrimaryLight,
+      secondary: AppColors.tealHighlightLight,
+      surface: AppColors.lightSurface,
+      error: AppColors.redDelete,
+      onPrimary: Colors.white,
+      onSurface: AppColors.lightTextPrimary,
+    ),
+    textTheme: TextTheme(
+      displayLarge: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 36, fontWeight: FontWeight.bold),
+      displayMedium: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 28, fontWeight: FontWeight.bold),
+      displaySmall: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+      headlineMedium: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 20, fontWeight: FontWeight.w600),
+      titleLarge: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 18, fontWeight: FontWeight.w600),
+      titleMedium: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+      bodyLarge: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 16, fontWeight: FontWeight.normal),
+      bodyMedium: AppStyles.getTextStyle(color: AppColors.lightTextSecondary, fontSize: 14, fontWeight: FontWeight.normal),
+      bodySmall: AppStyles.getTextStyle(color: AppColors.lightTextSecondary, fontSize: 12, fontWeight: FontWeight.normal),
+      labelLarge: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.lightSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: AppSizes.brLarge),
+      margin: AppSizes.paddingZero,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.navyPrimaryLight,
+        foregroundColor: Colors.white,
+        shape: AppStyles.buttonShape,
         elevation: 0,
-        centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontFamily: Font.montserrat,
-          fontWeight: FontWeight.w600,
-        ),
+        padding: AppSizes.paddingAll16,
+        textStyle: AppStyles.getTextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
       ),
-      scaffoldBackgroundColor: Colors.white,
-
-      ///Elevated button theme
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          elevation: WidgetStateProperty.all(0),
-          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(borderRadius: kRadius30),
-          ),
-          textStyle: WidgetStateProperty.all<TextStyle>(
-            const TextStyle(
-                fontFamily: Font.montserrat,
-                fontWeight: FontWeight.w600,
-                fontSize: 13),
-          ),
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            /// disabled state shouldn't be RED :)
-            if (states.contains(WidgetState.disabled)) {
-              return MyColors.greyDark;
-            }
-            return MyColors.trekBlue;
-          }),
-          foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
-          overlayColor: WidgetStateProperty.all<Color>(MyColors.grey),
-          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-            const EdgeInsets.only(
-              left: 35,
-              right: 35,
-              top: 15,
-              bottom: 15,
-            ),
-          ),
-        ),
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: AppColors.navyPrimaryLight,
+      inactiveTrackColor: AppColors.lightTrackInactive,
+      thumbColor: Colors.white,
+      overlayColor: AppColors.navyPrimaryLight.withValues(alpha: 0.1),
+      trackHeight: 6.0,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) => Colors.white),
+      trackColor: WidgetStateProperty.resolveWith((states) =>
+        states.contains(WidgetState.selected) ? AppColors.navyPrimaryLight : AppColors.lightTrackInactive
       ),
-
-      ///TextButton theme
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          textStyle: WidgetStateProperty.all<TextStyle>(
-            const TextStyle(
-                fontFamily: Font.montserrat,
-                fontWeight: FontWeight.w600,
-                fontSize: 13),
-          ),
-        ),
-      ),
-      switchTheme: SwitchThemeData(
-        trackColor: WidgetStateProperty.all<Color>(MyColors.trekBlue),
-      ));
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: false,
+      iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
+      titleTextStyle: AppStyles.getTextStyle(color: AppColors.lightTextPrimary, fontSize: 20, fontWeight: FontWeight.w600),
+    ),
+  );
 }
 
-///Expand darkTheme to meet your needs
 ThemeData get darkTheme {
-  return ThemeData();
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    fontFamily: AppStyles.fontFamily,
+    scaffoldBackgroundColor: AppColors.darkScaffold,
+    colorScheme: const ColorScheme.dark(
+      primary: AppColors.navyPrimaryDark,
+      secondary: AppColors.tealHighlightDark,
+      surface: AppColors.darkSurface,
+      error: AppColors.redDelete,
+      onPrimary: Colors.white,
+      onSurface: AppColors.darkTextPrimary,
+    ),
+    textTheme: TextTheme(
+      displayLarge: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 36, fontWeight: FontWeight.bold),
+      displayMedium: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 28, fontWeight: FontWeight.bold),
+      displaySmall: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+      headlineMedium: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 20, fontWeight: FontWeight.w600),
+      titleLarge: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 18, fontWeight: FontWeight.w600),
+      titleMedium: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+      bodyLarge: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 16, fontWeight: FontWeight.normal),
+      bodyMedium: AppStyles.getTextStyle(color: AppColors.darkTextSecondary, fontSize: 14, fontWeight: FontWeight.normal),
+      bodySmall: AppStyles.getTextStyle(color: AppColors.darkTextSecondary, fontSize: 12, fontWeight: FontWeight.normal),
+      labelLarge: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.darkSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: AppSizes.brLarge),
+      margin: AppSizes.paddingZero,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.navyPrimaryDark,
+        foregroundColor: Colors.white,
+        shape: AppStyles.buttonShape,
+        elevation: 0,
+        padding: AppSizes.paddingAll16,
+        textStyle: AppStyles.getTextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: AppColors.navyPrimaryDark,
+      inactiveTrackColor: AppColors.darkTrackInactive,
+      thumbColor: Colors.white,
+      overlayColor: AppColors.navyPrimaryDark.withValues(alpha: 0.1),
+      trackHeight: 6.0,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) => Colors.white),
+      trackColor: WidgetStateProperty.resolveWith((states) =>
+        states.contains(WidgetState.selected) ? AppColors.navyPrimaryDark : AppColors.darkTrackInactive
+      ),
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: false,
+      iconTheme: const IconThemeData(color: AppColors.darkTextPrimary),
+      titleTextStyle: AppStyles.getTextStyle(color: AppColors.darkTextPrimary, fontSize: 20, fontWeight: FontWeight.w600),
+    ),
+  );
 }
