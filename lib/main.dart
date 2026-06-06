@@ -1,20 +1,31 @@
-import 'package:flutter/material.dart';
+import 'package:luminaloan/screens.dart';
+import 'package:luminaloan/utils/utils.dart';
 
-void main() {
-  runApp(const MainApp());
+import 'commons.dart';
+import 'constants.dart';
+
+
+void main() async {
+
+  await initializeApp();
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+
+      theme: lightTheme,
+      navigatorKey: navigatorKey,
+      ///Screen names used from file screens.dart
+      initialRoute: Screens.profile,
+      routes: {
+        Screens.profile: (_) => const ProfileScreen()
+      },
     );
   }
 }
