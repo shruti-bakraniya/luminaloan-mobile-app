@@ -23,4 +23,27 @@ class AppColors {
   static const Color darkTextSecondary = Color(0xFF9CA3AF);
   static const Color darkTrackInactive = Color(0xFF374151);
   static const Color darkCardShadow = Color(0x40000000); // 25% opacity
+
+  // ── App Bar ──
+  static const Color lightAppBarBackground = lightSurface;
+  static const Color darkAppBarBackground = darkSurface;
+
+  // ── Currency / Theme Button ──
+  static const Color lightCurrencyBtnBorder = Color(0x4D212F45); // navyPrimaryLight 30%
+  static const Color darkCurrencyBtnBorder = Color(0x669CA3AF); // darkTextSecondary 40%
+  static const Color lightCurrencyBtnBackground = Color(0x00000000); // transparent
+  static const Color darkCurrencyBtnBackground = Color(0x4D2B3A54); // navyPrimaryDark 30%
+
+  // ── Currency Dropdown ──
+  static const Color lightDropdownBackground = lightSurface;
+  static const Color darkDropdownBackground = darkSurface;
+  static const Color lightDropdownSelectedBg = Color(0x1A212F45); // navyPrimaryLight 10%
+  static const Color darkDropdownSelectedBg = Color(0x662B3A54); // navyPrimaryDark 40%
+  static const Color lightCurrencyIconBg = navyPrimaryLight;
+  static const Color darkCurrencyIconBg = navyPrimaryDark;
+
+  // ── Brand Accent (for "Loan" text) ──
+  static const Color lightBrandAccent = tealHighlightLight;
+  static const Color darkBrandAccent = tealHighlightDark;
 }
+

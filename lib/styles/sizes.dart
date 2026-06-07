@@ -23,6 +23,8 @@ class AppSizes {
   static const EdgeInsets paddingH24 = EdgeInsets.symmetric(horizontal: p24);
   static const EdgeInsets paddingV16 = EdgeInsets.symmetric(vertical: p16);
   static const EdgeInsets paddingV24 = EdgeInsets.symmetric(vertical: p24);
+  static const EdgeInsets paddingH12 = EdgeInsets.symmetric(horizontal: p12);
+  static const EdgeInsets paddingV8 = EdgeInsets.symmetric(vertical: p8);
 
   // Border Radii
   static const double radiusSmall = 8.0;
@@ -50,4 +52,11 @@ class AppSizes {
   static const SizedBox gap20 = SizedBox.square(dimension: p20);
   static const SizedBox gap24 = SizedBox.square(dimension: p24);
   static const SizedBox gap32 = SizedBox.square(dimension: p32);
+
+  // ── App Bar ──
+  static const double appBarHeight = 64.0;
+  static const double appBarLogoSize = 40.0;
+  static const double currencyBtnHeight = 36.0;
+  static const double currencyIconSize = 36.0;
+  static const double dropdownWidth = 200.0;
 }
