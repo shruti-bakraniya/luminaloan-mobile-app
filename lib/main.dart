@@ -1,38 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'constants.dart';
-import 'screens.dart';
-import 'services/theme_provider.dart';
-import 'styles/themes.dart';
-import 'utils/utils.dart';
-
+import 'core/theme/app_theme.dart';
+import 'presentation/providers/theme_provider.dart';
+import 'presentation/screens/main_screen.dart';
 
 void main() async {
-
-  await initializeApp();
-  runApp(const ProviderScope(child: MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+  ));
+  runApp(const ProviderScope(child: LuminaLoanApp()));
 }
 
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
+class LuminaLoanApp extends ConsumerWidget {
+  const LuminaLoanApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
-
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      title: 'LuminaLoan',
+      debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      navigatorKey: navigatorKey,
-      ///Screen names used from file screens.dart
-      initialRoute: Screens.profile,
-      routes: {
-        Screens.profile: (_) => const ProfileScreen()
-      },
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      home: const MainScreen(),
     );
   }
 }

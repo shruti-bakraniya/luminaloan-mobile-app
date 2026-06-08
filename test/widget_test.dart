@@ -1,32 +1,47 @@
-/*
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:luminaloan/main.dart';
+import 'package:luminaloan/domain/usecases/loan_calculator.dart';
+import 'package:luminaloan/domain/entities/loan_params.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('LoanCalculator', () {
+    const calc = LoanCalculator();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('annuity computes correct monthly payment', () {
+      final result = calc.computeAnnuity(1000000, 12.0, 12);
+      expect(result.monthly, closeTo(88849, 1));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('differentiated first payment is higher than last', () {
+      final result = calc.computeDifferentiated(1000000, 12.0, 12);
+      expect(result.firstPayment, greaterThan(result.lastPayment));
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('validation rejects zero amount', () {
+      final errors = calc.validate(0, 8.5, 12, 'INR');
+      expect(errors.amount, isNotNull);
+      expect(errors.isValid, isFalse);
+    });
+
+    test('validation rejects negative rate', () {
+      final errors = calc.validate(100000, -1.0, 12, 'INR');
+      expect(errors.rate, isNotNull);
+    });
+
+    test('validation rejects zero term', () {
+      final errors = calc.validate(100000, 8.5, 0, 'INR');
+      expect(errors.term, isNotNull);
+    });
+
+    test('amortization schedule has correct number of rows', () {
+      final params = LoanParams(
+        amount: 500000,
+        annualRate: 10.0,
+        termMonths: 24,
+        type: PaymentType.annuity,
+        currency: 'INR',
+      );
+      final schedule = calc.buildSchedule(params);
+      expect(schedule.length, equals(24));
+    });
   });
 }
-*/
