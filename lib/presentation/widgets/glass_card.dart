@@ -45,29 +45,7 @@ class GlassCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: Stack(
-              children: [
-                child,
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: br,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            t.glassHi,
-                            Colors.transparent,
-                          ],
-                          stops: const [0.0, 0.15],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: child,
           ),
         ),
       ),

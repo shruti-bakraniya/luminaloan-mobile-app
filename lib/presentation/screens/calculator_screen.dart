@@ -23,7 +23,6 @@ class CalculatorScreen extends ConsumerStatefulWidget {
 }
 
 class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
-  bool _scheduleOpen = false;
   bool _showToast = false;
   bool _currencyMenuOpen = false;
 
@@ -36,6 +35,14 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      appBar: _Header(
+        t: t,
+        currency: loan.params.currency,
+        currencyMenuOpen: _currencyMenuOpen,
+        onToggleCurrencyMenu: () =>
+            setState(() => _currencyMenuOpen = !_currencyMenuOpen),
+      ),
       body: Stack(
         children: [
           _Background(t: t),
@@ -46,25 +53,50 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
                   child: _Content(
                     t: t,
                     loan: loan,
-                    onOpenSchedule: () => setState(() => _scheduleOpen = true),
+                    onOpenSchedule: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isDismissible: false,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        barrierColor: Colors.transparent,
+                        builder: (ctx) {
+                          return _ScheduleSheet(
+                            t: t,
+                            onClose: () {
+                              Navigator.pop(ctx);
+                            },
+                            loan: loan,
+                          );
+                        },
+                      );
+                    },
                     onSave: _handleSave,
-                    currencyMenuOpen: _currencyMenuOpen,
-                    onToggleCurrencyMenu: () =>
-                        setState(() => _currencyMenuOpen = !_currencyMenuOpen),
-                    onCloseCurrencyMenu: () =>
-                        setState(() => _currencyMenuOpen = false),
                   ),
                 ),
               ],
             ),
           ),
-          if (_scheduleOpen)
-            _ScheduleSheet(
-              t: t,
-              open: _scheduleOpen,
-              onClose: () => setState(() => _scheduleOpen = false),
-              loan: loan,
+          // Full-screen dismiss overlay for the currency menu
+          if (_currencyMenuOpen) ...[
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => setState(() => _currencyMenuOpen = false),
+                behavior: HitTestBehavior.translucent,
+                child: const SizedBox.expand(),
+              ),
             ),
+            // Currency dropdown menu - rendered here so it's not clipped by appBar bounds
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 46,
+              right: 16 + 8 + 38 + 8, // right padding + gap + theme button width + gap
+              child: _CurrencyMenu(
+                t: t,
+                selected: loan.params.currency,
+                onClose: () => setState(() => _currencyMenuOpen = false),
+              ),
+            ),
+          ],
           _Toast(t: t, show: _showToast, label: 'Saved to history'),
         ],
       ),
@@ -168,18 +200,12 @@ class _Content extends ConsumerWidget {
   final LoanState loan;
   final VoidCallback onOpenSchedule;
   final VoidCallback onSave;
-  final bool currencyMenuOpen;
-  final VoidCallback onToggleCurrencyMenu;
-  final VoidCallback onCloseCurrencyMenu;
 
   const _Content({
     required this.t,
     required this.loan,
     required this.onOpenSchedule,
     required this.onSave,
-    required this.currencyMenuOpen,
-    required this.onToggleCurrencyMenu,
-    required this.onCloseCurrencyMenu,
   });
 
   @override
@@ -188,13 +214,6 @@ class _Content extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       child: Column(
         children: [
-          _Header(
-            t: t,
-            currency: loan.params.currency,
-            currencyMenuOpen: currencyMenuOpen,
-            onToggleCurrencyMenu: onToggleCurrencyMenu,
-            onCloseCurrencyMenu: onCloseCurrencyMenu,
-          ),
           const SizedBox(height: 12),
           _HeroCard(t: t, loan: loan),
           const SizedBox(height: 13),
@@ -212,19 +231,17 @@ class _Content extends ConsumerWidget {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-class _Header extends ConsumerWidget {
+class _Header extends ConsumerWidget implements PreferredSizeWidget {
   final LuminaTokens t;
   final String currency;
   final bool currencyMenuOpen;
   final VoidCallback onToggleCurrencyMenu;
-  final VoidCallback onCloseCurrencyMenu;
 
   const _Header({
     required this.t,
     required this.currency,
     required this.currencyMenuOpen,
     required this.onToggleCurrencyMenu,
-    required this.onCloseCurrencyMenu,
   });
 
   @override
@@ -233,96 +250,83 @@ class _Header extends ConsumerWidget {
     final isDark = t.isDark;
     final cur = currencyOf(currency);
 
-    return Row(
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            gradient: t.accentGradient,
-            borderRadius: BorderRadius.circular(11),
-            boxShadow: const [BoxShadow(color: Color(0x733E5C8A), blurRadius: 16, offset: Offset(0, 6))],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              gradient: t.accentGradient,
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: const [BoxShadow(color: Color(0x733E5C8A), blurRadius: 16, offset: Offset(0, 6))],
+            ),
+            child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 18),
           ),
-          child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 18),
-        ),
-        const SizedBox(width: 9),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'Lumina',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                  color: t.text,
-                ),
-              ),
-              WidgetSpan(
-                child: ShaderMask(
-                  shaderCallback: (b) => t.accentGradient.createShader(b),
+          const SizedBox(width: 9),
+          RichText(
+            text: TextSpan(
+              children: [
+                WidgetSpan(
                   child: Text(
-                    'Loan',
+                    'Lumina',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.4,
-                      color: Colors.white,
+                      color: t.text,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _GlassButton(
-              t: t,
-              onTap: onToggleCurrencyMenu,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(cur.symbol, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.text)),
-                  const SizedBox(width: 5),
-                  Text(cur.code, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: t.subtext)),
-                ],
-              ),
-            ),
-            if (currencyMenuOpen) ...[
-              Positioned(
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: onCloseCurrencyMenu,
-                  behavior: HitTestBehavior.translucent,
+                WidgetSpan(
+                  child: ShaderMask(
+                    shaderCallback: (b) => t.accentGradient.createShader(b),
+                    child: Text(
+                      'Loan',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 46,
-                right: 0,
-                child: _CurrencyMenu(t: t, selected: currency, onClose: onCloseCurrencyMenu),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(width: 8),
-        _GlassButton(
-          t: t,
-          onTap: themeNotifier.toggle,
-          child: Icon(
-            isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-            size: 20,
-            color: t.text,
+              ],
+            ),
           ),
-        ),
-      ],
+          const Spacer(),
+          _GlassButton(
+            t: t,
+            onTap: onToggleCurrencyMenu,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(cur.symbol, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.text)),
+                const SizedBox(width: 5),
+                Text(cur.code, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: t.subtext)),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _GlassButton(
+            t: t,
+            onTap: themeNotifier.toggle,
+            child: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              size: 20,
+              color: t.text,
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  @override
+  Size get preferredSize =>
+      const Size.fromHeight(kToolbarHeight);
 }
 
 class _GlassButton extends StatelessWidget {
@@ -446,118 +450,97 @@ class _HeroCard extends StatelessWidget {
       t: t,
       strong: true,
       padding: const EdgeInsets.all(18),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            top: -40,
-            right: -30,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.steelBlue.withOpacity(t.isDark ? 0.22 : 0.16),
-                    Colors.transparent,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                p.type == PaymentType.differentiated
+                    ? 'First monthly payment'
+                    : 'Monthly payment',
+                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: t.subtext),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(color: t.track, borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      p.type == PaymentType.differentiated ? Icons.stairs_rounded : Icons.bolt_rounded,
+                      size: 13,
+                      color: p.type == PaymentType.differentiated ? t.interest : t.principal,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      p.type == PaymentType.differentiated ? 'Differentiated' : 'Annuity',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: t.subtext),
+                    ),
                   ],
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            height: 46,
+            child: isValid && r != null
+                ? AnimatedNumber(
+              value: r.firstPayment,
+              render: (v) =>
+              '${cur.symbol}${formatNumber(v, p.currency, decimals: 0)}',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1.5,
+                color: t.text,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            )
+                : Text(
+              '${cur.symbol}—',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                color: t.faint,
+                letterSpacing: -1,
+              ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 2),
+          Text(
+            isValid && r != null
+                ? 'over ${termLabel(p.termMonths)} · ${p.annualRate.toStringAsFixed(1)}% p.a.'
+                '${p.type == PaymentType.differentiated ? ' · ends at ${cur.symbol}${formatNumber(r.lastPayment, p.currency, decimals: 0)}' : ''}'
+                : 'Enter valid details to calculate',
+            style: TextStyle(fontSize: 11.5, color: t.subtext),
+          ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    p.type == PaymentType.differentiated
-                        ? 'First monthly payment'
-                        : 'Monthly payment',
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: t.subtext),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(color: t.track, borderRadius: BorderRadius.circular(8)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          p.type == PaymentType.differentiated ? Icons.stairs_rounded : Icons.bolt_rounded,
-                          size: 13,
-                          color: p.type == PaymentType.differentiated ? t.interest : t.principal,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          p.type == PaymentType.differentiated ? 'Differentiated' : 'Annuity',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: t.subtext),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: _StatItem(
+                  t: t,
+                  label: 'Total payment',
+                  valid: isValid,
+                  value: r?.total ?? 0,
+                  cur: cur,
+                  currency: p.currency,
+                ),
               ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: 46,
-                child: isValid && r != null
-                    ? AnimatedNumber(
-                        value: r.firstPayment,
-                        render: (v) =>
-                            '${cur.symbol}${formatNumber(v, p.currency, decimals: 0)}',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -1.5,
-                          color: t.text,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      )
-                    : Text(
-                        '${cur.symbol}—',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w800,
-                          color: t.faint,
-                          letterSpacing: -1,
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                isValid && r != null
-                    ? 'over ${termLabel(p.termMonths)} · ${p.annualRate.toStringAsFixed(1)}% p.a.'
-                        '${p.type == PaymentType.differentiated ? ' · ends at ${cur.symbol}${formatNumber(r.lastPayment, p.currency, decimals: 0)}' : ''}'
-                    : 'Enter valid details to calculate',
-                style: TextStyle(fontSize: 11.5, color: t.subtext),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatItem(
-                      t: t,
-                      label: 'Total payment',
-                      valid: isValid,
-                      value: r?.total ?? 0,
-                      cur: cur,
-                      currency: p.currency,
-                    ),
-                  ),
-                  Container(width: 1, height: 36, color: t.glassBorder),
-                  Expanded(
-                    child: _StatItem(
-                      t: t,
-                      label: 'Total interest',
-                      valid: isValid,
-                      value: r?.interest ?? 0,
-                      cur: cur,
-                      currency: p.currency,
-                      accent: true,
-                    ),
-                  ),
-                ],
+              Container(width: 1, height: 36, color: t.glassBorder),
+              Expanded(
+                child: _StatItem(
+                  t: t,
+                  label: 'Total interest',
+                  valid: isValid,
+                  value: r?.interest ?? 0,
+                  cur: cur,
+                  currency: p.currency,
+                  accent: true,
+                ),
               ),
             ],
           ),
@@ -892,13 +875,11 @@ class _SaveButton extends StatelessWidget {
 
 class _ScheduleSheet extends StatelessWidget {
   final LuminaTokens t;
-  final bool open;
   final VoidCallback onClose;
   final LoanState loan;
 
   const _ScheduleSheet({
     required this.t,
-    required this.open,
     required this.onClose,
     required this.loan,
   });
@@ -911,119 +892,115 @@ class _ScheduleSheet extends StatelessWidget {
     final cur = currencyOf(p.currency);
     String fmt(double v) => '${cur.symbol}${formatNumber(v, p.currency, decimals: 0)}';
 
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.fastOutSlowIn,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      top: open ? 54 : MediaQuery.of(context).size.height,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-          child: Container(
-            decoration: BoxDecoration(
-              color: t.glassStrong,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
-              border: Border.all(color: t.glassBorder),
-              boxShadow: const [BoxShadow(color: Color(0x4D000000), blurRadius: 50, offset: Offset(0, -20))],
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 9),
-                Container(width: 38, height: 4, decoration: BoxDecoration(color: t.faint, borderRadius: BorderRadius.circular(4))),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: onClose,
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(color: t.field, borderRadius: BorderRadius.circular(10)),
-                          child: Icon(Icons.arrow_back_rounded, color: t.text, size: 22),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          decoration: BoxDecoration(
+            color: t.glassStrong,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+            border: Border.all(color: t.glassBorder),
+            boxShadow: const [BoxShadow(color: Color(0x4D000000), blurRadius: 50, offset: Offset(0, -20))],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 9),
+              Container(width: 38, height: 4, decoration: BoxDecoration(color: t.faint, borderRadius: BorderRadius.circular(4))),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: onClose,
+                      child: Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(color: t.field, borderRadius: BorderRadius.circular(10)),
+                        child: Icon(Icons.arrow_back_rounded, color: t.text, size: 22),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Amortization schedule',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: t.text, letterSpacing: -0.3)),
+                        Text(
+                          '${loan.schedule.length} payments · ${p.type == PaymentType.differentiated ? 'Differentiated' : 'Annuity'}',
+                          style: TextStyle(fontSize: 11, color: t.subtext),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Row(
+                  children: [
+                    _Chip(t: t, label: 'Total paid', value: fmt(r.total)),
+                    const SizedBox(width: 8),
+                    _Chip(t: t, label: 'Principal', value: fmt(r.principal), color: t.principal),
+                    const SizedBox(width: 8),
+                    _Chip(t: t, label: 'Interest', value: fmt(r.interest), color: t.interest),
+                  ],
+                ),
+              ),
+              // table header
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: t.glass,
+                  border: Border(bottom: BorderSide(color: t.glassBorder)),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 30, child: Text('#', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: t.subtext))),
+                    for (final label in ['Payment', 'Principal', 'Interest', 'Balance'])
+                      Expanded(
+                        child: Text(
+                          label.toUpperCase(),
+                          textAlign: TextAlign.right,
+                          style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: t.subtext, letterSpacing: 0.3),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: loan.schedule.length,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, i) {
+                    final row = loan.schedule[i];
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                      color: i.isOdd
+                          ? (t.isDark ? Colors.white.withOpacity(0.02) : const Color(0xFF3E5C8A).withOpacity(0.03))
+                          : Colors.transparent,
+                      child: Row(
                         children: [
-                          Text('Amortization schedule',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: t.text, letterSpacing: -0.3)),
-                          Text(
-                            '${loan.schedule.length} payments · ${p.type == PaymentType.differentiated ? 'Differentiated' : 'Annuity'}',
-                            style: TextStyle(fontSize: 11, color: t.subtext),
+                          SizedBox(
+                            width: 30,
+                            child: Text('${row.month}',
+                                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: t.faint,
+                                    fontFeatures: const [FontFeature.tabularFigures()])),
                           ),
+                          _Cell(value: fmt(row.payment), color: t.text, t: t),
+                          _Cell(value: fmt(row.principal), color: t.principal, t: t),
+                          _Cell(value: fmt(row.interest), color: t.interest, t: t),
+                          _Cell(value: fmt(row.balance), color: t.subtext, t: t),
                         ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Row(
-                    children: [
-                      _Chip(t: t, label: 'Total paid', value: fmt(r.total)),
-                      const SizedBox(width: 8),
-                      _Chip(t: t, label: 'Principal', value: fmt(r.principal), color: t.principal),
-                      const SizedBox(width: 8),
-                      _Chip(t: t, label: 'Interest', value: fmt(r.interest), color: t.interest),
-                    ],
-                  ),
-                ),
-                // table header
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: t.glass,
-                    border: Border(bottom: BorderSide(color: t.glassBorder)),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 30, child: Text('#', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: t.subtext))),
-                      for (final label in ['Payment', 'Principal', 'Interest', 'Balance'])
-                        Expanded(
-                          child: Text(
-                            label.toUpperCase(),
-                            textAlign: TextAlign.right,
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: t.subtext, letterSpacing: 0.3),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: loan.schedule.length,
-                    itemBuilder: (context, i) {
-                      final row = loan.schedule[i];
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                        color: i.isOdd
-                            ? (t.isDark ? Colors.white.withOpacity(0.02) : const Color(0xFF3E5C8A).withOpacity(0.03))
-                            : Colors.transparent,
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width: 30,
-                              child: Text('${row.month}',
-                                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: t.faint,
-                                      fontFeatures: const [FontFeature.tabularFigures()])),
-                            ),
-                            _Cell(value: fmt(row.payment), color: t.text, t: t),
-                            _Cell(value: fmt(row.principal), color: t.principal, t: t),
-                            _Cell(value: fmt(row.interest), color: t.interest, t: t),
-                            _Cell(value: fmt(row.balance), color: t.subtext, t: t),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

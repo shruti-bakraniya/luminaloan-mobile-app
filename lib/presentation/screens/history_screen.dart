@@ -190,15 +190,7 @@ class _HistoryList extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (h.sparkBalances.isNotEmpty)
-                              Sparkline(balances: h.sparkBalances, color: t.principal),
-                            const SizedBox(height: 8),
-                            Text(h.date, style: TextStyle(fontSize: 10, color: t.faint)),
-                          ],
-                        ),
+                        Text(h.date, style: TextStyle(fontSize: 10, color: t.faint)),
                       ],
                     ),
                     const SizedBox(height: 12),
