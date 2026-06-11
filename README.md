@@ -1,6 +1,6 @@
 # LuminaLoan — Loan & Mortgage Calculator
 
-[Download Android APK](https://github.com/shruti-bakraniya/luminaloan-mobile-app/releases/download/v0.0.1/luminaloan_v1.apk)
+[Download Android APK](https://github.com/shruti-bakraniya/luminaloan-mobile-app/releases/download/v0.0.1/luminaloan-v1.apk)
 
 A premium Flutter mobile app for calculating **annuity** and **differentiated** loan payments with real-time results, interactive data visualizations, multi-currency support, and a glassmorphic UI with dark/light theming.
 
