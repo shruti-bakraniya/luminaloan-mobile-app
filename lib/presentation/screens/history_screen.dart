@@ -7,7 +7,6 @@ import '../../domain/entities/loan_params.dart';
 import '../providers/history_provider.dart';
 import '../providers/loan_provider.dart';
 import '../providers/theme_provider.dart';
-import '../widgets/charts/sparkline.dart';
 import '../widgets/glass_card.dart';
 
 class HistoryScreen extends ConsumerWidget {
@@ -40,7 +39,11 @@ class HistoryScreen extends ConsumerWidget {
           SafeArea(
             child: history.isEmpty
                 ? _EmptyState(t: t)
-                : _HistoryList(t: t, history: history, onNavigateToCalc: onNavigateToCalc),
+                : _HistoryList(
+                    t: t,
+                    history: history,
+                    onNavigateToCalc: onNavigateToCalc,
+                  ),
           ),
         ],
       ),
@@ -54,40 +57,46 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: t.glass,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: t.glassBorder),
-                    ),
-                    child: Icon(Icons.history_rounded, color: t.faint, size: 32),
-                  ),
+    child: Padding(
+      padding: const EdgeInsets.all(30),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: t.glass,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: t.glassBorder),
                 ),
+                child: Icon(Icons.history_rounded, color: t.faint, size: 32),
               ),
-              const SizedBox(height: 12),
-              Text('No saved calculations yet',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.text)),
-              const SizedBox(height: 6),
-              Text(
-                'Tap "Save calculation" on a result and it will appear here for quick recall.',
-                style: TextStyle(fontSize: 12.5, color: t.subtext),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 12),
+          Text(
+            'No saved calculations yet',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: t.text,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tap "Save calculation" on a result and it will appear here for quick recall.',
+            style: TextStyle(fontSize: 12.5, color: t.subtext),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _HistoryList extends ConsumerWidget {
@@ -95,7 +104,11 @@ class _HistoryList extends ConsumerWidget {
   final List history;
   final VoidCallback onNavigateToCalc;
 
-  const _HistoryList({required this.t, required this.history, required this.onNavigateToCalc});
+  const _HistoryList({
+    required this.t,
+    required this.history,
+    required this.onNavigateToCalc,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -122,7 +135,8 @@ class _HistoryList extends ConsumerWidget {
             itemBuilder: (context, i) {
               final h = history[i];
               final cur = currencyOf(h.currency);
-              String fmt(double v) => '${cur.symbol}${formatNumber(v, h.currency, decimals: 0)}';
+              String fmt(double v) =>
+                  '${cur.symbol}${formatNumber(v, h.currency, decimals: 0)}';
 
               return GlassCard(
                 t: t,
@@ -141,15 +155,31 @@ class _HistoryList extends ConsumerWidget {
                                   Text(
                                     fmt(h.amount),
                                     style: TextStyle(
-                                        fontSize: 17, fontWeight: FontWeight.w800, color: t.text, letterSpacing: -0.4),
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: t.text,
+                                      letterSpacing: -0.4,
+                                    ),
                                   ),
                                   const SizedBox(width: 7),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                    decoration: BoxDecoration(color: t.track, borderRadius: BorderRadius.circular(6)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: t.track,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
                                     child: Text(
-                                      h.type == PaymentType.differentiated ? 'DIFF' : 'ANNUITY',
-                                      style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: t.subtext),
+                                      h.type == PaymentType.differentiated
+                                          ? 'DIFF'
+                                          : 'ANNUITY',
+                                      style: TextStyle(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: t.subtext,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -157,12 +187,21 @@ class _HistoryList extends ConsumerWidget {
                               const SizedBox(height: 2),
                               Text(
                                 '${h.rate}% p.a. · ${termLabel(h.term)}',
-                                style: TextStyle(fontSize: 11.5, color: t.subtext),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: t.subtext,
+                                ),
                               ),
                               const SizedBox(height: 7),
                               Row(
                                 children: [
-                                  Text('Monthly', style: TextStyle(fontSize: 11, color: t.subtext)),
+                                  Text(
+                                    'Monthly',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: t.subtext,
+                                    ),
+                                  ),
                                   const SizedBox(width: 5),
                                   Text(
                                     fmt(h.monthly),
@@ -170,11 +209,19 @@ class _HistoryList extends ConsumerWidget {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: t.principal,
-                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
                                     ),
                                   ),
                                   const SizedBox(width: 6),
-                                  Text('Interest', style: TextStyle(fontSize: 11, color: t.subtext)),
+                                  Text(
+                                    'Interest',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: t.subtext,
+                                    ),
+                                  ),
                                   const SizedBox(width: 5),
                                   Text(
                                     fmt(h.interest),
@@ -182,7 +229,9 @@ class _HistoryList extends ConsumerWidget {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       color: t.interest,
-                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -190,7 +239,10 @@ class _HistoryList extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Text(h.date, style: TextStyle(fontSize: 10, color: t.faint)),
+                        Text(
+                          h.date,
+                          style: TextStyle(fontSize: 10, color: t.faint),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -199,11 +251,21 @@ class _HistoryList extends ConsumerWidget {
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              ref.read(loanCalculatorProvider.notifier).setAmount(h.amount);
-                              ref.read(loanCalculatorProvider.notifier).setRate(h.rate);
-                              ref.read(loanCalculatorProvider.notifier).setTerm(h.term);
-                              ref.read(loanCalculatorProvider.notifier).setType(h.type);
-                              ref.read(loanCalculatorProvider.notifier).setCurrency(h.currency);
+                              ref
+                                  .read(loanCalculatorProvider.notifier)
+                                  .setAmount(h.amount);
+                              ref
+                                  .read(loanCalculatorProvider.notifier)
+                                  .setRate(h.rate);
+                              ref
+                                  .read(loanCalculatorProvider.notifier)
+                                  .setTerm(h.term);
+                              ref
+                                  .read(loanCalculatorProvider.notifier)
+                                  .setType(h.type);
+                              ref
+                                  .read(loanCalculatorProvider.notifier)
+                                  .setCurrency(h.currency);
                               onNavigateToCalc();
                             },
                             child: Container(
@@ -212,20 +274,30 @@ class _HistoryList extends ConsumerWidget {
                                 gradient: t.accentGradient,
                                 borderRadius: BorderRadius.circular(11),
                                 boxShadow: const [
-                                  BoxShadow(color: Color(0x593E5C8A), blurRadius: 12, offset: Offset(0, 4))
+                                  BoxShadow(
+                                    color: Color(0x593E5C8A),
+                                    blurRadius: 12,
+                                    offset: Offset(0, 4),
+                                  ),
                                 ],
                               ),
                               child: const Center(
-                                child: Text('Open',
-                                    style: TextStyle(
-                                        fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white)),
+                                child: Text(
+                                  'Open',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         GestureDetector(
-                          onTap: () => ref.read(historyProvider.notifier).delete(h.id),
+                          onTap: () =>
+                              ref.read(historyProvider.notifier).delete(h.id),
                           child: Container(
                             width: 40,
                             height: 40,
@@ -234,7 +306,11 @@ class _HistoryList extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(11),
                               border: Border.all(color: t.glassBorder),
                             ),
-                            child: Icon(Icons.delete_outline_rounded, color: t.error, size: 18),
+                            child: Icon(
+                              Icons.delete_outline_rounded,
+                              color: t.error,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],
