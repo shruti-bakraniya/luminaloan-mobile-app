@@ -1,1 +1,0 @@
-Fonts go here. A font folder is used instead of Google Fonts as many apps might be using custom fonts
